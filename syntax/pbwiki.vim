@@ -4,17 +4,17 @@
 " Home:         http://www.georgevreilly.com/vim/pbwiki/
 " Other Home:   http://www.vim.org/scripts/script.php?script_id=2138
 " Author:       George V. Reilly
-" Last Change: Sun Feb 03 01:00 AM 2008 P
-" Version:      0.1
+" Last Change: Sun Feb 03 12:00 PM 2008 P
+" Version:      0.2
 
 " Quit if syntax file is already loaded
 if version < 600
     syntax clear
-" elseif exists("b:current_syntax")
+elseif exists("b:current_syntax")
     finish
 endif
 
-" A WikiWord
+" A WikiWord is PascalCased. A ~ prefix disables WikiWording
 syntax match  pbwikiWord          /\%(\~\@<![A-Z][a-z0-9]\+[A-Za-z0-9]*[A-Z]\+[A-Za-z0-9]*\)/
 " A [bracketed wiki word]
 syntax match  pbwikiWord          /\[[[:alnum:]\s]\+\]/
@@ -23,25 +23,30 @@ syntax match  pbwikiWord          /\[[[:alnum:]\s]\+\]/
 " text: [http://pbwiki.com/|PBwiki]
 " text: support@pbwiki.com
 " text: [support@pbwiki.com|help!!]
-syntax match pbwikiLink           `\(https\?\|ftp\|mailto\|file\):\(\(\(//\)\|\(\\\\\)\)*[A-Za-z0-9:#@%/;$~_?+-=.&\-\\\\]*\)`
-syntax match pbwikiLink           `\[\(https\?\|ftp\|mailto\|file\):\(\(\(//\)\|\(\\\\\)\)*[A-Za-z0-9:#@%/;$~_?+-=.&\-\\\\]*\)|[^]].\{-}\]`
-syntax match pbwikiLink           `[A-Za-z0-9._%+-]\+@[A-Za-z0-9.-]\+\.[A-Za-z]\{2,4}`
-syntax match pbwikiLink           `\[[A-Za-z0-9._%+-]\+@[A-Za-z0-9.-]\+\.[A-Za-z]\{2,4}|[^]].\{-}\]`
+
+let s:re_url='\(https\?\|ftp\|mailto\|file\):\(\(\(//\)\|\(\\\\\)\)*[A-Za-z0-9:#@%/;$~_?+-=.&\-\\\\]*\)'
+let s:re_email='[A-Za-z0-9._%+-]\+@[A-Za-z0-9.-]\+\.[A-Za-z]\{2,5}'
+let s:re_linkname='[^]].\{-}'
+
+exe 'syntax match pbwikiLink `' . s:re_url . '`'
+exe 'syntax match pbwikiLink `\[' . s:re_url . '|' . s:re_linkname . '\]`'
+exe 'syntax match pbwikiLink `' . s:re_email . '`'
+exe 'syntax match pbwikiLink `\[' . s:re_email . '|' . s:re_linkname . '\]`'
 
 " text: **strong** 
-syntax match pbwikiBold           /\(^\|\W\)\zs\*\*\([^\* ].\{-}\)\*\*/
+syntax match pbwikiBold           /\*\*\([^*].\{-}\)\*\*/
 
 " ''italic''
 syntax match pbwikiItalic         /''\([^'].\{-}\)''/
 
 " text: __underlined__ 
-syntax match pbwikiUnderlined     /\(^\|\W\)\zs__\([^\* ].\{-}\)__/
+syntax match pbwikiUnderlined     /__\([^_].\{-}\)__/
 
 " <raw>text</raw>
 syntax match pbwikiCode           /<raw>\([^<].\{-}\)<\/raw>/
 
 "   text: -strikethrough- 
-syntax match pbwikiDelText        /\(^\|\s\+\)\zs-\([^ <a ]\|[^ <img ]\|[^ -].*\)-/
+syntax match pbwikiDelText        /\s-\([^-].\{-}\)-\s/
 
 " Aggregate all the regular text highlighting into pbwikiText
 syntax cluster pbwikiText contains=pbwikiItalic,pbwikiBold,pbwikiCode,pbwikiDelText,pbwikiLink,pbwikiWord,pbwikiUnderlined
@@ -57,16 +62,13 @@ syntax match pbwikiH6             /^!!!!!!.*$/
 " Tables. Each line starts and ends with '|'; each cell is separated by '|'
 syntax match pbwikiTable          /|/
 
-" Bulleted list items start with one or tabs, followed by whitespace, then '*'
-" Numeric  list items start with one or tabs, followed by whitespace, then '1.'
-" Eight spaces at the beginning of the line is equivalent to the leading tab.
+" * One ''* (asterisk) + a space'' at the beginning of a line makes a bullet point, like this.
+" # Use ''# + a space'' at the beginning of a line to make a numbered list, like this.
+" ## Nested lists like this one are made by doubling the * or # for subpoints
 syntax match pbwikiList           /^\(\*\|#\)\+ .*$/   contains=@pbwikiText
 
-" Treat all other lines that start with spaces as PRE-formatted text.
-" syntax match pbwikiPre            /^[ \t]\+[^ \t*1].*$/
-
-" Handle nested HTML inside .html blocks
-" syn cluster htmlPreProc add=@tt2_top_cluster
+" Treat all other lines that start with spaces as boxes
+syntax match pbwikiBox            /^[ \t]\+[^ \t*1].*$/
 
 " Link PBwiki syntax items to colors
 hi def link pbwikiH1                    Title
@@ -85,13 +87,11 @@ hi def link pbwikiCode                  Statement
 hi def link pbwikiWord                  Underlined
 
 hi def link pbwikiEscape                Todo
-hi def link pbwikiPre                   PreProc
+hi def link pbwikiBox                   PreProc
 hi def link pbwikiLink                  Underlined
 hi def link pbwikiList                  Type
 hi def link pbwikiTable                 Type
 hi def link pbwikiDelText               Comment
-
-hi def link pbwikiSingleLineProperty    Identifier
 
 let b:current_syntax="PBwiki"
 
