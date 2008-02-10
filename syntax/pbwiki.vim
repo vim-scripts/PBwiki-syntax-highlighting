@@ -4,7 +4,7 @@
 " Home:         http://www.georgevreilly.com/vim/pbwiki/
 " Other Home:   http://www.vim.org/scripts/script.php?script_id=2138
 " Author:       George V. Reilly
-" Last Change: Sun Feb 03 12:00 PM 2008 P
+" Last Change: Sun Feb 10 07:00 PM 2008 P
 " Version:      0.2
 
 " Quit if syntax file is already loaded

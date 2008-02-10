@@ -111,3 +111,4 @@ Here it is at a glance:
 
 <top>
 
+.. vim:set ft=pbwiki:
